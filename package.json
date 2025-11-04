@@ -1,0 +1,24 @@
+{
+  "name": "nexusauto-notificationservice",
+  "version": "1.0.0",
+  "description": "",
+  "homepage": "https://github.com/Akalishan/NexusAuto-NotificationService#readme",
+  "bugs": {
+    "url": "https://github.com/Akalishan/NexusAuto-NotificationService/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Akalishan/NexusAuto-NotificationService.git"
+  },
+  "license": "ISC",
+  "author": "",
+  "type": "commonjs",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies": {
+    "express": "^5.1.0",
+    "socket.io": "^4.8.1"
+  }
+}
