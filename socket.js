@@ -7,7 +7,7 @@ global.connectedUsers = new Map();
 export const initSocket = (server) => {
   io = new Server(server, {
     cors: {
-      origin:process.env.FRONTEND_ORIGIN,
+      origin: "*",
       methods: ["GET", "POST"],
     },
   });
@@ -16,12 +16,15 @@ export const initSocket = (server) => {
     console.log("New client connected:", socket.id);
 
     // Step 1: Register user
-    socket.on("register", async (userId) => {
-      global.connectedUsers.set(userId, socket.id);
-      console.log(`Registered user ${userId} with socket ${socket.id}`);
+    socket.on("register", async (data) => {
+      const { id, type } = data; // type = "user" or "employee"
+      const key = `${type}-${id}`;
+      global.connectedUsers.set(key, socket.id);
+
+      console.log(`Registered ${type} ${id} with socket ${socket.id}`);
 
       // Step 2: Send any pending notifications (in order)
-      const pending = await Notification.find({ userId, status: "pending" }).sort({ createdAt: 1 });
+      const pending = await Notification.find({ userId: id, recipientType: type, status: "pending" }).sort({ createdAt: 1 });
       for (const notif of pending) {
         io.to(socket.id).emit("notification", notif);
         notif.status = "sent";
@@ -41,9 +44,9 @@ export const initSocket = (server) => {
 
     socket.on("disconnect", () => {
       console.log("Client disconnected:", socket.id);
-      for (const [userId, id] of global.connectedUsers.entries()) {
+      for (const [key, id] of global.connectedUsers.entries()) {
         if (id === socket.id) {
-          global.connectedUsers.delete(userId);
+          global.connectedUsers.delete(key);
           break;
         }
       }

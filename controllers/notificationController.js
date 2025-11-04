@@ -4,14 +4,17 @@ import { io } from "../socket.js";
 //Send new notification
 export const sendNotification = async (req, res) => {
   try {
-    const { userId, title, message } = req.body;
-    if (!userId || !message)
-      return res.status(400).json({ success: false, message: "Missing fields" });
+    const { userId, title, message, recipientType } = req.body;
+    if (!userId || !message || !recipientType)
+      return res
+        .status(400)
+        .json({ success: false, message: "Missing fields" });
 
-    const notification = new Notification({ userId, title, message });
+    const notification = new Notification({ userId, title, message, recipientType });
     await notification.save();
 
-    const socketId = global.connectedUsers.get(userId);
+     const key = `${recipientType}-${userId}`;
+    const socketId = global.connectedUsers.get(key);
     if (socketId) {
       io.to(socketId).emit("notification", notification);
       notification.status = "sent";
@@ -28,8 +31,9 @@ export const sendNotification = async (req, res) => {
 export const getNotifications = async (req, res) => {
   try {
     const { userId } = req.params;
-    const notifications = await Notification.find({ userId })
-      .sort({ createdAt: -1 }); // newest first
+    const notifications = await Notification.find({ userId }).sort({
+      createdAt: -1,
+    }); // newest first
     res.status(200).json({ success: true, notifications });
   } catch (err) {
     res.status(500).json({ success: false, message: err.message });
