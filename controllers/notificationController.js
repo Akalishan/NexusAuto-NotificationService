@@ -50,3 +50,30 @@ export const deleteNotification = async (req, res) => {
     res.status(500).json({ success: false, message: err.message });
   }
 };
+
+//mark all notifications as read for a user
+export const markAllAsRead = async (req, res) => {
+  try {
+    const { userId } = req.params;
+    await Notification.updateMany(
+      { userId, read: false },
+      { $set: { read: true } }
+    );
+    res.status(200).json({ message: "All notifications marked as read" });
+  } catch (error) {
+    res.status(500).json({ message: "Server Error", error: error.message });
+  }
+};
+
+//delete all messages
+export const deleteAllNotifications = async (req, res) => {
+  try {
+    const { userId } = req.params;
+    await Notification.deleteMany({ userId });
+    res.status(200).json({ message: "All notifications deleted successfully" });
+  } catch (error) {
+    res.status(500).json({ message: "Server Error", error: error.message });
+  }
+};
+
+
